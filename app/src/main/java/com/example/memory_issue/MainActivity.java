@@ -8,11 +8,15 @@ import io.flutter.plugin.common.MethodChannel;
 
 import androidx.annotation.NonNull;
 
+import java.util.ArrayList;
+
 public class MainActivity extends FlutterActivity {
 
-    private static final String CHANNEL = "com.example.app";
+    private static final String CHANNEL = "main_channel";
     private static int RQ_CODE = 1;
     private MethodChannel.Result _result;
+    public static final String CALLBACK_HANDLE_KEY = "callback_handle_key";
+    public static final String CALLBACK_DISPATCHER_HANDLE_KEY = "callback_dispatcher_handle_key";
 
     @Override
     public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
@@ -21,8 +25,15 @@ public class MainActivity extends FlutterActivity {
                 .setMethodCallHandler(
                         (call, result) -> {
                             _result = result; //Store
-                            Intent intent = new Intent(this, SecondActivity.class);
-                            startActivityForResult(intent, RQ_CODE);
+                            if (call.method.equals("test")) {
+                                Intent intent = new Intent(this, SecondActivity.class);
+                                ArrayList args = call.arguments();
+                                long mCallbackDispatcherHandle = (long) args.get(0);
+                                long callbackHandle = (long) args.get(1);
+                                intent.putExtra(CALLBACK_HANDLE_KEY, callbackHandle);
+                                intent.putExtra(CALLBACK_DISPATCHER_HANDLE_KEY, mCallbackDispatcherHandle);
+                                startActivityForResult(intent, RQ_CODE);
+                            }
                         }
                 );
     }
